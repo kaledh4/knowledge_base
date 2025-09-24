@@ -2,11 +2,11 @@
 
 ## Step 1: GitHub Secrets Configuration
 - [ ] Go to `https://github.com/kaledh4/knowledge_base` → Settings → Secrets and variables → Actions
-- [ ] Add **7 Backend Secrets**: `APPWRITE_ENDPOINT` → `https://fra.cloud.appwrite.io/v1`, `APPWRITE_PROJECT_ID` → `68d3ae0a0029bcf8d185`, `APPWRITE_API_KEY`, `APPWRITE_DATABASE_ID`, `APPWRITE_COLLECTION_ID`, `APPWRITE_EMAIL`, `APPWRITE_PASSWORD`
-- [ ] Add **6 Frontend Secrets**: `VITE_APPWRITE_ENDPOINT` → `https://fra.cloud.appwrite.io/v1`, `VITE_APPWRITE_PROJECT_ID` → `68d3ae0a0029bcf8d185`, and other `VITE_*` variables (database ID, collection ID, function IDs)
+- [ ] Add **7 Backend Secrets**: `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`, `APPWRITE_API_KEY`, `APPWRITE_DATABASE_ID`, `APPWRITE_COLLECTION_ID`, `APPWRITE_EMAIL`, `APPWRITE_PASSWORD`
+- [ ] Add **6 Frontend Secrets**: All `VITE_*` variables (endpoint, project ID, database ID, collection ID, function IDs)
 
 ## Step 2: Appwrite Project Setup
-- [ ] Create account at [Appwrite Cloud](https://fra.cloud.appwrite.io)
+- [ ] Create account at [Appwrite Cloud](https://cloud.appwrite.io)
 - [ ] Create new project: "Knowledge Base RAG"
 - [ ] Generate API Key with full permissions
 - [ ] Create database: `clips-db`
@@ -73,7 +73,7 @@ npm run setup
 
 ## Important URLs
 - **Repository**: https://github.com/kaledh4/knowledge_base
-- **Appwrite Console**: https://fra.cloud.appwrite.io
+- **Appwrite Console**: https://cloud.appwrite.io
 - **Local Development**: http://localhost:3000
 
 ## Need Help?

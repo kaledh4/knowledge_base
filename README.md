@@ -58,8 +58,8 @@ cp .env.example .env.local
 
 # Edit .env.local with your Appwrite credentials
 # Get these from your Appwrite console
-VITE_APPWRITE_ENDPOINT=https://fra.cloud.appwrite.io/v1
-VITE_APPWRITE_PROJECT_ID=68d3ae0a0029bcf8d185
+VITE_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+VITE_APPWRITE_PROJECT_ID=your-project-id
 VITE_APPWRITE_DATABASE_ID=clips-db
 VITE_APPWRITE_COLLECTION_ID=clips
 ```
@@ -286,7 +286,7 @@ const result = await mcpClient.callTool("create_clip", {
    ```bash
    # Update .env.production
    VITE_APPWRITE_ENDPOINT=https://your-appwrite-instance.com/v1
-   VITE_APPWRITE_PROJECT_ID=68d3ae0a0029bcf8d185
+   VITE_APPWRITE_PROJECT_ID=production-project-id
    ```
 
 ### Self-Hosted Appwrite

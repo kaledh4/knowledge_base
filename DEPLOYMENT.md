@@ -23,8 +23,8 @@ In your GitHub repository, go to Settings > Secrets and Variables > Actions, and
 
 #### Required Secrets:
 ```
-APPWRITE_ENDPOINT=https://fra.cloud.appwrite.io/v1
-APPWRITE_PROJECT_ID=68d3ae0a0029bcf8d185
+APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+APPWRITE_PROJECT_ID=your-project-id
 APPWRITE_API_KEY=your-api-key
 APPWRITE_DATABASE_ID=your-database-id
 APPWRITE_COLLECTION_ID=your-collection-id
@@ -32,8 +32,8 @@ APPWRITE_EMAIL=your-appwrite-email
 APPWRITE_PASSWORD=your-appwrite-password
 
 # Frontend Environment Variables
-VITE_APPWRITE_ENDPOINT=https://fra.cloud.appwrite.io/v1
-VITE_APPWRITE_PROJECT_ID=68d3ae0a0029bcf8d185
+VITE_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+VITE_APPWRITE_PROJECT_ID=your-project-id
 VITE_APPWRITE_DATABASE_ID=your-database-id
 VITE_APPWRITE_COLLECTION_ID=your-collection-id
 VITE_APPWRITE_SCRAPE_FUNCTION_ID=scrape-function
@@ -55,7 +55,7 @@ VITE_APPWRITE_MCP_FUNCTION_ID=mcp-server
 
 ### Step 1: Create Appwrite Project
 
-1. Login to [Appwrite Console](https://fra.cloud.appwrite.io)
+1. Login to [Appwrite Console](https://cloud.appwrite.io)
 2. Create new project
 3. Note down Project ID
 
@@ -165,8 +165,8 @@ node deploy.js
 ### Local Development
 Create `.env.local`:
 ```
-VITE_APPWRITE_ENDPOINT=https://fra.cloud.appwrite.io/v1
-VITE_APPWRITE_PROJECT_ID=68d3ae0a0029bcf8d185
+VITE_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+VITE_APPWRITE_PROJECT_ID=your-project-id
 VITE_APPWRITE_DATABASE_ID=your-database-id
 VITE_APPWRITE_COLLECTION_ID=your-collection-id
 VITE_APPWRITE_SCRAPE_FUNCTION_ID=your-scrape-function-id
