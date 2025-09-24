@@ -67,17 +67,39 @@ export function KnowledgeBaseList() {
   const [editTags, setEditTags] = useState("")
   const { toast } = useToast()
 
+  const { toast } = useToast()
+
   useEffect(() => {
-    // Load entries from localStorage
-    const stored = localStorage.getItem("knowledgeBase")
-    if (stored) {
-      const parsed = JSON.parse(stored).map((entry: any) => ({
-        ...entry,
-        createdAt: new Date(entry.createdAt),
-      }))
-      setEntries(parsed)
+    const fetchEntries = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (user) {
+        const { data, error } = await supabase
+          .from("knowledge_entries")
+          .select("*")
+          .eq("user_id", user.id)
+
+        if (error) {
+          console.error("Error fetching entries:", error)
+          toast({
+            title: "Error",
+            description: "Could not fetch your knowledge base.",
+            variant: "destructive",
+          })
+        } else if (data) {
+          const parsed = data.map((entry: any) => ({
+            ...entry,
+            createdAt: new Date(entry.created_at),
+          }))
+          setEntries(parsed)
+        }
+      }
     }
-  }, [])
+
+    fetchEntries()
+  }, [toast])
 
   useEffect(() => {
     // Filter and sort entries
@@ -117,24 +139,49 @@ export function KnowledgeBaseList() {
     setFilteredEntries(filtered)
   }, [searchQuery, filterBy, sortBy, entries])
 
-  const deleteEntry = (id: string) => {
-    const updated = entries.filter((entry) => entry.id !== id)
-    setEntries(updated)
-    localStorage.setItem("knowledgeBase", JSON.stringify(updated))
-    toast({
-      title: "Entry deleted",
-      description: "The entry has been removed from your knowledge base.",
-    })
+  const deleteEntry = async (id: string) => {
+    const { error } = await supabase.from("knowledge_entries").delete().match({ id })
+
+    if (error) {
+      toast({
+        title: "Error deleting entry",
+        description: error.message,
+        variant: "destructive",
+      })
+    } else {
+      const updated = entries.filter((entry) => entry.id !== id)
+      setEntries(updated)
+      toast({
+        title: "Entry deleted",
+        description: "The entry has been removed from your knowledge base.",
+      })
+    }
   }
 
-  const updateEntry = (updatedEntry: KnowledgeEntry) => {
-    const updated = entries.map((entry) => (entry.id === updatedEntry.id ? updatedEntry : entry))
-    setEntries(updated)
-    localStorage.setItem("knowledgeBase", JSON.stringify(updated))
-    toast({
-      title: "Entry updated",
-      description: "Your changes have been saved.",
-    })
+  const updateEntry = async (updatedEntry: KnowledgeEntry) => {
+    const { error } = await supabase
+      .from("knowledge_entries")
+      .update({
+        title: updatedEntry.title,
+        content: updatedEntry.content,
+        tags: updatedEntry.tags,
+      })
+      .match({ id: updatedEntry.id })
+
+    if (error) {
+      toast({
+        title: "Error updating entry",
+        description: error.message,
+        variant: "destructive",
+      })
+    } else {
+      const updated = entries.map((entry) => (entry.id === updatedEntry.id ? updatedEntry : entry))
+      setEntries(updated)
+      toast({
+        title: "Entry updated",
+        description: "Your changes have been saved.",
+      })
+    }
   }
 
   const exportData = () => {
