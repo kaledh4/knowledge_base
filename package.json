@@ -1,17 +1,13 @@
 {
-  "name": "own-rag",
+  "name": "knowledge-base",
   "version": "1.0.0",
-  "description": "Personal Knowledge Management System with Appwrite and MCP integration",
+  "description": "Simple Knowledge Management System for Vercel",
   "private": true,
   "scripts": {
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start",
-    "deploy": "node deploy.js",
-    "setup": "npm install && node deploy.js",
-    "test-scrape": "cd functions/scrape && node -e \"require('./src/main.js').default({data: JSON.stringify({url: 'https://example.com'})})\"",
-    "test-mcp": "cd functions/mcp && node src/main.js"
+    "start": "next start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -53,7 +49,6 @@
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
     "next": "14.2.16",
-    "node-appwrite": "^13.0.0",
     "next-themes": "^0.4.6",
     "react": "^18",
     "react-day-picker": "9.8.0",
@@ -79,13 +74,10 @@
     "typescript": "^5"
   },
   "keywords": [
-    "rag",
     "knowledge-management",
-    "appwrite",
-    "mcp",
     "nextjs",
-    "scraping",
-    "ai"
+    "vercel",
+    "local-storage"
   ],
   "author": "Your Name",
     "license": "MIT",
