@@ -1,4 +1,7 @@
-# OWN RAG - Personal Knowledge Management System
+# Knowledge Base - Personal RAG System
+
+[![GitHub Repository](https://img.shields.io/badge/GitHub-kaledh4%2Fknowledge__base-blue?logo=github)](https://github.com/kaledh4/knowledge_base)
+[![Deploy to Appwrite](https://img.shields.io/badge/Deploy%20to-Appwrite-f02e65?logo=appwrite)](https://appwrite.io)
 
 A comprehensive personal knowledge management system built with Next.js, Appwrite, and MCP (Model Context Protocol) integration. This system allows you to scrape, store, and manage web content and video information with AI-powered search capabilities.
 
@@ -42,8 +45,8 @@ A comprehensive personal knowledge management system built with Next.js, Appwrit
 ### 1. Clone and Setup
 
 ```bash
-git clone <your-repo-url>
-cd OWN_RAG
+git clone https://github.com/kaledh4/knowledge_base.git
+cd knowledge_base
 npm install
 ```
 
@@ -223,6 +226,48 @@ const result = await mcpClient.callTool("create_clip", {
 ```
 
 ## Deployment
+
+### GitHub to Appwrite Deployment
+
+#### Option 1: Direct GitHub Integration
+
+1. **Connect GitHub Repository to Appwrite:**
+   - Go to your Appwrite Console
+   - Navigate to Functions
+   - Create new function and select "Git Repository"
+   - Connect to `https://github.com/kaledh4/knowledge_base`
+   - Set branch to `master`
+
+2. **Configure Function Deployment:**
+   ```bash
+   # For Scrape Function
+   Root Directory: functions/scrape
+   Entry Point: src/main.js
+   
+   # For MCP Function  
+   Root Directory: functions/mcp
+   Entry Point: src/main.js
+   ```
+
+3. **Set Environment Variables in Appwrite Console:**
+   - `APPWRITE_API_KEY`: Your Appwrite API key
+   - `APPWRITE_DATABASE_ID`: Database ID
+   - `APPWRITE_COLLECTION_ID`: Collection ID
+
+#### Option 2: Manual Deployment
+
+1. **Clone and Deploy:**
+   ```bash
+   git clone https://github.com/kaledh4/knowledge_base.git
+   cd knowledge_base
+   npm install
+   npm run setup  # Run deployment script
+   ```
+
+2. **Deploy Functions:**
+   ```bash
+   npm run deploy
+   ```
 
 ### Production Deployment
 
