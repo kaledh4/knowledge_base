@@ -1,401 +1,91 @@
-# Knowledge Base - Personal RAG System
+# Knowledge Base - Simple Vercel Version
 
-[![GitHub Repository](https://img.shields.io/badge/GitHub-kaledh4%2Fknowledge__base-blue?logo=github)](https://github.com/kaledh4/knowledge_base)
-[![Deploy to Appwrite](https://img.shields.io/badge/Deploy%20to-Appwrite-f02e65?logo=appwrite)](https://appwrite.io)
-
-A comprehensive personal knowledge management system built with Next.js, Appwrite, and MCP (Model Context Protocol) integration. This system allows you to scrape, store, and manage web content and video information with AI-powered search capabilities.
+A simple knowledge management system built with Next.js that runs entirely in the browser using localStorage for data persistence.
 
 ## Features
 
-- 🌐 **Web Content Scraping**: Extract text content from any URL using trafilatura
-- 🎥 **Video Information Extraction**: Get metadata and transcripts from video URLs using yt-dlp
-- 🔍 **Full-Text Search**: Search through your saved clips with powerful indexing
-- 🤖 **MCP Integration**: Model Context Protocol server for AI assistant integration
-- 🔐 **User Authentication**: Secure user management with Appwrite Auth
+- 🌐 **Web Content Management**: Add and organize web content and notes
+- 🔍 **Full-Text Search**: Search through your saved content
 - 📱 **Modern UI**: Responsive interface built with Next.js and Tailwind CSS
-- ☁️ **Cloud Functions**: Serverless backend with Appwrite Functions
-
-## Architecture
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Next.js App   │────│  Appwrite API   │────│   Database      │
-│   (Frontend)    │    │   (Backend)     │    │   (Collections) │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │
-         │              ┌─────────────────┐
-         └──────────────│  MCP Server     │
-                        │  (AI Integration)│
-                        └─────────────────┘
-                                 │
-                        ┌─────────────────┐
-                        │ Scrape Function │
-                        │ (Content Extract)│
-                        └─────────────────┘
-```
+- 💾 **Local Storage**: All data stored locally in your browser
+- ⚡ **Fast Deployment**: Deploy to Vercel with zero configuration
 
 ## Quick Start
 
-### Prerequisites
-
-- Node.js 18+ and npm
-- Appwrite Cloud account or self-hosted instance
-- Python 3.8+ (for scraping functions)
-
 ### 1. Clone and Setup
-
 ```bash
 git clone https://github.com/kaledh4/knowledge_base.git
 cd knowledge_base
 npm install
 ```
 
-### 2. Environment Configuration
-
-```bash
-# Copy environment template
-cp .env.example .env.local
-
-# Edit .env.local with your Appwrite credentials
-# Get these from your Appwrite console
-VITE_APPWRITE_ENDPOINT=your-appwrite-endpoint
-VITE_APPWRITE_PROJECT_ID=your-project-id
-VITE_APPWRITE_DATABASE_ID=your-database-id
-VITE_APPWRITE_COLLECTION_ID=your-collection-id
-```
-
-### 3. Deploy Appwrite Backend
-
-```bash
-# Install deployment dependencies
-npm install node-appwrite dotenv
-
-# Run deployment script
-node deploy.js
-```
-
-This will:
-- Create the database and collections
-- Set up proper indexes for search
-- Configure function environments
-- Deploy the scrape and MCP functions
-
-### 4. Start Development Server
-
+### 2. Start Development Server
 ```bash
 npm run dev
 ```
+Open http://localhost:3000 to view the application.
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+### 3. Deploy to Vercel
+
+#### Option 1: Via Vercel Dashboard
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Click "New Project"
+3. Import your GitHub repository
+4. Deploy with default settings (no environment variables needed)
+
+#### Option 2: Via Git Push
+```bash
+git add .
+git commit -m "Deploy to Vercel"
+git push origin master
+```
 
 ## Project Structure
-
 ```
-OWN_RAG/
+knowledge_base/
 ├── app/                    # Next.js app directory
 │   ├── globals.css        # Global styles
 │   ├── layout.tsx         # Root layout
 │   └── page.tsx          # Home page
 ├── components/            # React components
 │   ├── ui/               # Reusable UI components
-│   └── clip-manager.tsx  # Main clip management interface
+│   └── *.tsx            # Main application components
 ├── lib/                  # Utility libraries
-│   ├── appwrite.ts      # Appwrite client configuration
 │   └── utils.ts         # Helper functions
-├── functions/            # Appwrite Functions
-│   ├── scrape/          # Content scraping function
-│   │   ├── src/main.js  # Scraping logic
-│   │   ├── package.json # Dependencies
-│   │   └── appwrite.json# Function configuration
-│   └── mcp/             # MCP server function
-│       ├── src/main.js  # MCP server implementation
-│       ├── package.json # Dependencies
-│       └── appwrite.json# Function configuration
-├── deploy.js            # Deployment automation script
-├── .env.example         # Environment template
+├── package.json          # Dependencies and scripts
 └── README.md           # This file
 ```
 
-## Functions Overview
+## How It Works
 
-### Scrape Function (`/functions/scrape`)
-
-Extracts content from URLs using:
-- **trafilatura**: Primary text extraction tool
-- **cheerio**: Fallback HTML parsing
-- **yt-dlp**: Video metadata and transcript extraction
-
-**Supported Content Types:**
-- Web articles and blog posts
-- YouTube videos (metadata + transcripts)
-- PDF documents (when accessible via URL)
-- Social media posts
-
-### MCP Server Function (`/functions/mcp`)
-
-Provides AI assistant integration through Model Context Protocol:
-
-**Resources:**
-- `clips://recent` - Recently added clips
-- `clips://all` - All user clips
-- `clips://search` - Searchable clip interface
-
-**Tools:**
-- `create_clip` - Add new content from URL
-- `search_clips` - Full-text search
-- `get_clip` - Retrieve specific clip
-- `delete_clip` - Remove clip
-
-## Database Schema
-
-### Clips Collection
-
-```javascript
-{
-  "$id": "unique_clip_id",
-  "url": "https://example.com/article",
-  "title": "Article Title",
-  "content": "Extracted text content...",
-  "metadata": {
-    "author": "Author Name",
-    "publishDate": "2024-01-01",
-    "duration": "10:30", // for videos
-    "wordCount": 1500
-  },
-  "userId": "user_id",
-  "createdAt": "2024-01-01T00:00:00.000Z",
-  "$permissions": [
-    "read(\"user:user_id\")",
-    "write(\"user:user_id\")",
-    "delete(\"user:user_id\")"
-  ]
-}
-```
-
-### Indexes
-
-- `userId_index` - Fast user-specific queries
-- `createdAt_index` - Chronological sorting
-- `title_search` - Full-text search on titles
-- `content_search` - Full-text search on content
-
-## API Usage
-
-### Frontend Integration
-
-```typescript
-import { databases, account } from '@/lib/appwrite';
-
-// Create a new clip
-const createClip = async (url: string) => {
-  const user = await account.get();
-  const response = await functions.createExecution(
-    'scrape',
-    JSON.stringify({ url }),
-    false
-  );
-  return JSON.parse(response.response);
-};
-
-// Search clips
-const searchClips = async (query: string) => {
-  return await databases.listDocuments(
-    'clips-db',
-    'clips',
-    [
-      Query.search('title', query),
-      Query.search('content', query)
-    ]
-  );
-};
-```
-
-### MCP Integration
-
-```javascript
-// Connect to MCP server
-const mcpClient = new Client({
-  name: "clip-manager",
-  version: "1.0.0"
-});
-
-// Use MCP tools
-const result = await mcpClient.callTool("create_clip", {
-  url: "https://example.com/article"
-});
-```
-
-## 🚀 Secure GitHub to Appwrite Deployment
-
-⚠️ **SECURITY NOTICE**: Never commit sensitive credentials to your repository!
-
-This project supports multiple secure deployment methods:
-
-### Quick Deploy Options
-
-1. **Direct GitHub Integration** (Recommended)
-   - Connect your GitHub repository directly in Appwrite Console
-   - Auto-deploy functions on every push
-   - Manage environment variables securely in Appwrite Console
-
-2. **GitHub Actions with Secrets** (Advanced)
-   - Automated CI/CD pipeline using GitHub Secrets
-   - Deploy both frontend and backend securely
-   - All credentials stored as encrypted secrets
-
-3. **Local Development**
-   - Use `.env.local` file (gitignored for security)
-   - Perfect for development and testing
-
-📖 **Secure Setup Guide**: See [SECURE_DEPLOYMENT.md](./SECURE_DEPLOYMENT.md) for complete security-focused instructions.
-📖 **Legacy Guide**: [DEPLOYMENT.md](./DEPLOYMENT.md) (update your secrets configuration)
-
-## Deployment
-
-### GitHub to Appwrite Deployment
-
-#### Option 1: Direct GitHub Integration
-
-1. **Connect GitHub Repository to Appwrite:**
-   - Go to your Appwrite Console
-   - Navigate to Functions
-   - Create new function and select "Git Repository"
-   - Connect to `https://github.com/kaledh4/knowledge_base`
-   - Set branch to `master`
-
-2. **Configure Function Deployment:**
-   ```bash
-   # For Scrape Function
-   Root Directory: functions/scrape
-   Entry Point: src/main.js
-   
-   # For MCP Function  
-   Root Directory: functions/mcp
-   Entry Point: src/main.js
-   ```
-
-3. **Set Environment Variables in Appwrite Console:**
-   - `APPWRITE_API_KEY`: Your Appwrite API key
-   - `APPWRITE_DATABASE_ID`: Database ID
-   - `APPWRITE_COLLECTION_ID`: Collection ID
-
-#### Option 2: Manual Deployment
-
-1. **Clone and Deploy:**
-   ```bash
-   git clone https://github.com/kaledh4/knowledge_base.git
-   cd knowledge_base
-   npm install
-   npm run setup  # Run deployment script
-   ```
-
-2. **Deploy Functions:**
-   ```bash
-   npm run deploy
-   ```
-
-### Production Deployment
-
-1. **Deploy to Vercel/Netlify:**
-   ```bash
-   npm run build
-   # Deploy build folder to your hosting platform
-   ```
-
-2. **Configure Appwrite Functions:**
-   - Upload function code via Appwrite Console
-   - Set environment variables
-   - Enable function execution
-
-3. **Set Production Environment:**
-   ```bash
-   # Update .env.production
-   VITE_APPWRITE_ENDPOINT=https://your-appwrite-instance.com/v1
-   VITE_APPWRITE_PROJECT_ID=production-project-id
-   ```
-
-### Self-Hosted Appwrite
-
-If using self-hosted Appwrite:
-
-```bash
-# Clone Appwrite
-git clone https://github.com/appwrite/appwrite.git
-cd appwrite
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your settings
-
-# Start Appwrite
-docker-compose up -d
-```
+This is a client-side application that:
+- Stores all data in browser localStorage
+- Provides a simple interface for managing knowledge items
+- Includes search functionality across stored content
+- Works entirely offline after initial load
 
 ## Development
 
-### Adding New Features
-
-1. **Frontend Components**: Add to `/components`
-2. **API Routes**: Use Appwrite SDK in `/lib`
-3. **Functions**: Create in `/functions` directory
-4. **Styling**: Use Tailwind CSS classes
-
-### Testing Functions Locally
-
 ```bash
-# Test scrape function
-cd functions/scrape
-node -e "require('./src/main.js').default({data: JSON.stringify({url: 'https://example.com'})})"
+# Install dependencies
+npm install
 
-# Test MCP server
-cd functions/mcp
-node src/main.js
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
 ```
 
-## Troubleshooting
+## Deployment
 
-### Common Issues
+This application is optimized for Vercel deployment:
+- No environment variables required
+- No backend services needed
+- Automatic builds on git push
+- Global CDN distribution
 
-1. **Function Timeout**: Increase timeout in `appwrite.json`
-2. **Permission Denied**: Check collection permissions
-3. **Scraping Fails**: Verify Python dependencies are installed
-4. **MCP Connection**: Ensure function is deployed and accessible
-
-### Debug Mode
-
-Enable debug logging:
-
-```javascript
-// In function code
-console.log('Debug:', JSON.stringify(data, null, 2));
-```
-
-### Performance Optimization
-
-- Use database indexes for frequent queries
-- Implement caching for repeated scrapes
-- Optimize content extraction for large documents
-- Use pagination for large result sets
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details.
-
-## Support
-
-For issues and questions:
-- Check the [Issues](../../issues) page
-- Review Appwrite [documentation](https://appwrite.io/docs)
-- Check MCP [specification](https://modelcontextprotocol.io/)
-
----
-
-**Built with ❤️ using Next.js, Appwrite, and MCP**
+**Built with ❤️ using Next.js and localStorage**
