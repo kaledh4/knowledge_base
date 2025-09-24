@@ -46,6 +46,8 @@ export function ContentSubmissionForm() {
   // Twitter form state
   const [twitterUrl, setTwitterUrl] = useState("")
   const [twitterTitle, setTwitterTitle] = useState("")
+  const [extractedTwitterContent, setExtractedTwitterContent] = useState("")
+  const [isExtractingTwitter, setIsExtractingTwitter] = useState(false)
 
   const saveToLocalStorage = (entry: KnowledgeEntry) => {
     const existing = JSON.parse(localStorage.getItem("knowledgeBase") || "[]")
@@ -176,6 +178,45 @@ export function ContentSubmissionForm() {
     }
   }
 
+  const extractTwitterContent = async () => {
+    if (!twitterUrl) return
+
+    setIsExtractingTwitter(true)
+    setExtractedTwitterContent("")
+
+    try {
+      const response = await fetch("/api/x/extract", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: twitterUrl }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to extract tweet content")
+      }
+
+      const data = await response.json()
+      setExtractedTwitterContent(data.content)
+
+      toast({
+        title: "Tweet content extracted!",
+        description: "The content of the tweet has been successfully extracted.",
+      })
+    } catch (error) {
+      console.error("Twitter extraction error:", error)
+      setExtractedTwitterContent("[Could not extract tweet content.]")
+      toast({
+        title: "Extraction Failed",
+        description: "Could not extract content from the tweet. You can still save the link.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsExtractingTwitter(false)
+    }
+  }
+
   const handleTwitterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -185,7 +226,7 @@ export function ContentSubmissionForm() {
         id: Date.now().toString(),
         type: "twitter",
         title: twitterTitle || "Twitter Post",
-        content: `Twitter/X post: ${twitterUrl}\n\n[Content extraction will be enhanced in future updates]`,
+        content: extractedTwitterContent || `Twitter/X post: ${twitterUrl}\n\n[Content not extracted]`,
         url: twitterUrl,
         tags: ["twitter", "social"],
         createdAt: new Date(),
@@ -200,6 +241,7 @@ export function ContentSubmissionForm() {
 
       setTwitterUrl("")
       setTwitterTitle("")
+      setExtractedTwitterContent("")
     } catch (error) {
       toast({
         title: "Error",
@@ -379,14 +421,25 @@ export function ContentSubmissionForm() {
           <form onSubmit={handleTwitterSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="twitter-url">Post URL</Label>
-              <Input
-                id="twitter-url"
-                type="url"
-                placeholder="https://x.com/username/status/..."
-                value={twitterUrl}
-                onChange={(e) => setTwitterUrl(e.target.value)}
-                required
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="twitter-url"
+                  type="url"
+                  placeholder="https://x.com/username/status/..."
+                  value={twitterUrl}
+                  onChange={(e) => setTwitterUrl(e.target.value)}
+                  required
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={extractTwitterContent}
+                  disabled={!twitterUrl || isExtractingTwitter}
+                >
+                  {isExtractingTwitter ? <Loader2 className="h-4 w-4 animate-spin" /> : "Extract"}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="twitter-title">Title (optional)</Label>
@@ -397,6 +450,12 @@ export function ContentSubmissionForm() {
                 onChange={(e) => setTwitterTitle(e.target.value)}
               />
             </div>
+            {extractedTwitterContent && (
+              <div className="space-y-2">
+                <Label>Extracted Content</Label>
+                <Textarea value={extractedTwitterContent} readOnly className="min-h-[80px] text-sm" />
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>

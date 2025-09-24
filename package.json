@@ -60,6 +60,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
+    "youtube-transcript": "^1.2.1",
     "zod": "3.25.67"
   },
   "devDependencies": {
@@ -80,7 +81,7 @@
     "local-storage"
   ],
   "author": "Your Name",
-    "license": "MIT",
+  "license": "MIT",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
