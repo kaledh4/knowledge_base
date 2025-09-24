@@ -44,22 +44,19 @@ async function getVideoMetadata(videoId: string) {
   }
 }
 
+import { YoutubeTranscript } from "youtube-transcript"
+
 // Extract transcript using youtube-transcript library approach
 async function getTranscript(videoId: string): Promise<string> {
   try {
-    // For now, we'll return a placeholder since we can't install external packages
-    // In a real implementation, you would use youtube-transcript or similar
-    return `[Transcript extraction is not yet implemented. This is a placeholder for video ID: ${videoId}]
-
-To implement full transcript extraction, you would need to:
-1. Install a package like 'youtube-transcript' or 'youtubei-dl'
-2. Handle different transcript languages
-3. Parse and clean the transcript text
-4. Handle videos without transcripts
-
-For now, you can manually paste transcript text in the text content section.`
+    const transcript = await YoutubeTranscript.fetchTranscript(videoId)
+    return transcript.map((item) => item.text).join(" ")
   } catch (error) {
     console.error("Error extracting transcript:", error)
+    // Check if the error indicates no transcript is available
+    if (error.message.includes("Could not find a transcript for this video") || error.message.includes("Transcript is disabled on this video")) {
+      return "[No transcript available for this video.]"
+    }
     throw new Error("Failed to extract transcript")
   }
 }
