@@ -1,0 +1,29 @@
+{
+  "projectId": "[PROJECT_ID]",
+  "functions": [
+    {
+      "$id": "scrape",
+      "name": "URL Scraper",
+      "runtime": "node-18.0",
+      "execute": ["any"],
+      "events": [],
+      "schedule": "",
+      "timeout": 300,
+      "enabled": true,
+      "logging": true,
+      "entrypoint": "src/main.js",
+      "commands": "npm install && apt-get update && apt-get install -y python3 python3-pip && pip3 install trafilatura yt-dlp",
+      "ignore": [
+        "node_modules",
+        ".npm"
+      ],
+      "variables": {
+        "APPWRITE_FUNCTION_ENDPOINT": "https://cloud.appwrite.io/v1",
+        "APPWRITE_FUNCTION_PROJECT_ID": "[PROJECT_ID]",
+        "APPWRITE_DATABASE_ID": "[DATABASE_ID]",
+        "APPWRITE_COLLECTION_ID": "[COLLECTION_ID]",
+        "APPWRITE_API_KEY": "[API_KEY]"
+      }
+    }
+  ]
+}

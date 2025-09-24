@@ -1,0 +1,29 @@
+{
+  "projectId": "[PROJECT_ID]",
+  "functions": [
+    {
+      "$id": "mcp",
+      "name": "MCP Server",
+      "runtime": "node-18.0",
+      "execute": ["any"],
+      "events": [],
+      "schedule": "",
+      "timeout": 300,
+      "enabled": true,
+      "logging": true,
+      "entrypoint": "src/main.js",
+      "commands": "npm install",
+      "ignore": [
+        "node_modules",
+        ".npm"
+      ],
+      "variables": {
+        "APPWRITE_FUNCTION_ENDPOINT": "https://cloud.appwrite.io/v1",
+        "APPWRITE_FUNCTION_PROJECT_ID": "[PROJECT_ID]",
+        "APPWRITE_DATABASE_ID": "[DATABASE_ID]",
+        "APPWRITE_COLLECTION_ID": "[COLLECTION_ID]",
+        "APPWRITE_API_KEY": "[API_KEY]"
+      }
+    }
+  ]
+}

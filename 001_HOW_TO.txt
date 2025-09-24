@@ -1,0 +1,45 @@
+Here is the exact one-sentence brief you can paste into any LLM agent (Claude, Copilot, Cursor, etc.) that will give you a free, single-container, self-hosted Appwrite stack with:
+
+* dark-mode PWA front-end  
+* e-mail/password login  
+* back-end that already exposes an MCP (Model-Context-Protocol) server so an LLM can later “talk” to the user’s saved links/text  
+
+---
+
+### Paste-this prompt
+
+> “Create a completely free, single-container, self-hosted application using Appwrite as the only back-end.  
+> Deliverables:  
+> 1. A React + Vite PWA (dark-mode, mobile-first) that lets a user register / log in with e-mail + password through Appwrite auth.  
+> 2. A paste-box on the home screen: user drops any YouTube / website / X link → front-end calls an Appwrite cloud function (Node 20) that extracts clean text with yt-dlp and trafilatura, then stores {url, title, text, favicon} in an Appwrite database collection called clips.  
+> 3. A full-text search bar that queries the clips collection and a ⭐ Favorite toggle (boolean field).  
+> 4. An MCP server (Model-Context-Protocol) written as another Appwrite function; it exposes /mcp endpoint that implements the MCP “resources” and “tools” interface so an external LLM can later list or search the user’s clips.  
+> 5. A single docker-compose.yml that starts Appwrite + all functions; keep everything inside that one container group so the stack is 100 % self-contained and free to run on Oracle Always-Free, Fly.io free volumes, or local Docker.  
+> 6. Provide the GitHub repo structure, .env template, and the exact CLI commands (`appwrite init`, appwrite deploy function, etc.) so I can clone and deploy in under 5 minutes.”
+
+---
+
+### What the agent will hand back
+
+1. Folder layout  
+   
+copy
+
+
+   ├── appwrite/          ← docker-compose.yml (official Appwrite single-container pack)
+   ├── frontend/          ← Vite-React PWA (Tailwind dark theme, workbox SW)
+   ├── functions/
+   │   ├── scrape/        ← Node 20 – extracts text + thumbnails
+   │   └── mcp/           ← Node 20 – MCP server (resources = user clips)
+   └── README.md          ← one-liner deploy: `docker compose up -d && npm run deploy`
+   
+
+2. All Appwrite JSON metadata (collections, auth rules, function routes) as code so you can appwrite deploy --all in CI.
+
+3. Pre-built React components: Login.jsx, PasteBox.jsx, SearchClips.jsx, FavToggle.jsx – already wired to Appwrite SDK v11.
+
+4. MCP function implements:  
+   - resources/list → returns every clip URL  
+   - tools/call → search_clips(query) returns matching JSON so any LLM that speaks MCP can “see” the user’s library.
+
+Run it anywhere Docker runs → completely free, no vendor lock, and the LLM integration is ready the moment the container starts.
