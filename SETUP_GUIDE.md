@@ -15,8 +15,8 @@ Click **New repository secret** for each of the following:
 #### Required GitHub Secrets:
 
 **Backend Secrets:**
-- `APPWRITE_ENDPOINT` → `https://cloud.appwrite.io/v1`
-- `APPWRITE_PROJECT_ID` → Get from Appwrite Console
+- `APPWRITE_ENDPOINT` → `https://fra.cloud.appwrite.io/v1`
+- `APPWRITE_PROJECT_ID` → `68d3ae0a0029bcf8d185`
 - `APPWRITE_API_KEY` → Generate in Appwrite Console
 - `APPWRITE_DATABASE_ID` → Create in Step 2
 - `APPWRITE_COLLECTION_ID` → Create in Step 2
@@ -24,8 +24,8 @@ Click **New repository secret** for each of the following:
 - `APPWRITE_PASSWORD` → Your Appwrite login password
 
 **Frontend Secrets:**
-- `VITE_APPWRITE_ENDPOINT` → `https://cloud.appwrite.io/v1`
-- `VITE_APPWRITE_PROJECT_ID` → Same as above
+- `VITE_APPWRITE_ENDPOINT` → `https://fra.cloud.appwrite.io/v1`
+- `VITE_APPWRITE_PROJECT_ID` → `68d3ae0a0029bcf8d185`
 - `VITE_APPWRITE_DATABASE_ID` → Same as above
 - `VITE_APPWRITE_COLLECTION_ID` → Same as above
 - `VITE_APPWRITE_SCRAPE_FUNCTION_ID` → `scrape-function`
