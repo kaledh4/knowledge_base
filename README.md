@@ -58,10 +58,10 @@ cp .env.example .env.local
 
 # Edit .env.local with your Appwrite credentials
 # Get these from your Appwrite console
-VITE_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+VITE_APPWRITE_ENDPOINT=your-appwrite-endpoint
 VITE_APPWRITE_PROJECT_ID=your-project-id
-VITE_APPWRITE_DATABASE_ID=clips-db
-VITE_APPWRITE_COLLECTION_ID=clips
+VITE_APPWRITE_DATABASE_ID=your-database-id
+VITE_APPWRITE_COLLECTION_ID=your-collection-id
 ```
 
 ### 3. Deploy Appwrite Backend
@@ -224,6 +224,31 @@ const result = await mcpClient.callTool("create_clip", {
   url: "https://example.com/article"
 });
 ```
+
+## 🚀 Secure GitHub to Appwrite Deployment
+
+⚠️ **SECURITY NOTICE**: Never commit sensitive credentials to your repository!
+
+This project supports multiple secure deployment methods:
+
+### Quick Deploy Options
+
+1. **Direct GitHub Integration** (Recommended)
+   - Connect your GitHub repository directly in Appwrite Console
+   - Auto-deploy functions on every push
+   - Manage environment variables securely in Appwrite Console
+
+2. **GitHub Actions with Secrets** (Advanced)
+   - Automated CI/CD pipeline using GitHub Secrets
+   - Deploy both frontend and backend securely
+   - All credentials stored as encrypted secrets
+
+3. **Local Development**
+   - Use `.env.local` file (gitignored for security)
+   - Perfect for development and testing
+
+📖 **Secure Setup Guide**: See [SECURE_DEPLOYMENT.md](./SECURE_DEPLOYMENT.md) for complete security-focused instructions.
+📖 **Legacy Guide**: [DEPLOYMENT.md](./DEPLOYMENT.md) (update your secrets configuration)
 
 ## Deployment
 
