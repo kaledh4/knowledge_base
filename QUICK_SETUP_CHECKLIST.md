@@ -2,14 +2,8 @@
 
 ## Step 1: GitHub Secrets Configuration
 - [ ] Go to `https://github.com/kaledh4/knowledge_base` → Settings → Secrets and variables → Actions
-- [ ] Add `APPWRITE_ENDPOINT` (https://cloud.appwrite.io/v1)
-- [ ] Add `APPWRITE_PROJECT_ID` (from Appwrite Console)
-- [ ] Add `APPWRITE_API_KEY` (from Appwrite Console)
-- [ ] Add `APPWRITE_DATABASE_ID` (from Appwrite Console)
-- [ ] Add `APPWRITE_COLLECTION_ID` (from Appwrite Console)
-- [ ] Add `APPWRITE_EMAIL` (your Appwrite account email)
-- [ ] Add `APPWRITE_PASSWORD` (your Appwrite account password)
-- [ ] Add all `VITE_*` frontend environment variables
+- [ ] Add **7 Backend Secrets**: `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`, `APPWRITE_API_KEY`, `APPWRITE_DATABASE_ID`, `APPWRITE_COLLECTION_ID`, `APPWRITE_EMAIL`, `APPWRITE_PASSWORD`
+- [ ] Add **6 Frontend Secrets**: All `VITE_*` variables (endpoint, project ID, database ID, collection ID, function IDs)
 
 ## Step 2: Appwrite Project Setup
 - [ ] Create account at [Appwrite Cloud](https://cloud.appwrite.io)

@@ -12,51 +12,24 @@ This guide will walk you through the complete setup process for deploying your R
 ### 1.2 Add Required Secrets
 Click **New repository secret** for each of the following:
 
-#### Core Appwrite Secrets:
-```
-Name: APPWRITE_ENDPOINT
-Value: https://cloud.appwrite.io/v1
-(or your self-hosted URL like https://your-domain.com/v1)
+#### Required GitHub Secrets:
 
-Name: APPWRITE_PROJECT_ID
-Value: [Your Appwrite Project ID - get this from Step 2]
+**Backend Secrets:**
+- `APPWRITE_ENDPOINT` → `https://cloud.appwrite.io/v1`
+- `APPWRITE_PROJECT_ID` → Get from Appwrite Console
+- `APPWRITE_API_KEY` → Generate in Appwrite Console
+- `APPWRITE_DATABASE_ID` → Create in Step 2
+- `APPWRITE_COLLECTION_ID` → Create in Step 2
+- `APPWRITE_EMAIL` → Your Appwrite login email
+- `APPWRITE_PASSWORD` → Your Appwrite login password
 
-Name: APPWRITE_API_KEY
-Value: [Your Appwrite API Key - get this from Step 2]
-
-Name: APPWRITE_DATABASE_ID
-Value: [Your Database ID - get this from Step 2]
-
-Name: APPWRITE_COLLECTION_ID
-Value: [Your Collection ID - get this from Step 2]
-
-Name: APPWRITE_EMAIL
-Value: [Your Appwrite account email]
-
-Name: APPWRITE_PASSWORD
-Value: [Your Appwrite account password]
-```
-
-#### Frontend Environment Secrets:
-```
-Name: VITE_APPWRITE_ENDPOINT
-Value: https://cloud.appwrite.io/v1
-
-Name: VITE_APPWRITE_PROJECT_ID
-Value: [Same as APPWRITE_PROJECT_ID]
-
-Name: VITE_APPWRITE_DATABASE_ID
-Value: [Same as APPWRITE_DATABASE_ID]
-
-Name: VITE_APPWRITE_COLLECTION_ID
-Value: [Same as APPWRITE_COLLECTION_ID]
-
-Name: VITE_APPWRITE_SCRAPE_FUNCTION_ID
-Value: scrape-function
-
-Name: VITE_APPWRITE_MCP_FUNCTION_ID
-Value: mcp-server
-```
+**Frontend Secrets:**
+- `VITE_APPWRITE_ENDPOINT` → `https://cloud.appwrite.io/v1`
+- `VITE_APPWRITE_PROJECT_ID` → Same as above
+- `VITE_APPWRITE_DATABASE_ID` → Same as above
+- `VITE_APPWRITE_COLLECTION_ID` → Same as above
+- `VITE_APPWRITE_SCRAPE_FUNCTION_ID` → `scrape-function`
+- `VITE_APPWRITE_MCP_FUNCTION_ID` → `mcp-server`
 
 ---
 
