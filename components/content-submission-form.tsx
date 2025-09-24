@@ -49,10 +49,25 @@ export function ContentSubmissionForm() {
   const [extractedTwitterContent, setExtractedTwitterContent] = useState("")
   const [isExtractingTwitter, setIsExtractingTwitter] = useState(false)
 
-  const saveToLocalStorage = (entry: KnowledgeEntry) => {
-    const existing = JSON.parse(localStorage.getItem("knowledgeBase") || "[]")
-    existing.push(entry)
-    localStorage.setItem("knowledgeBase", JSON.stringify(existing))
+  const saveToSupabase = async (entry: Omit<KnowledgeEntry, "id" | "createdAt">) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      toast({
+        title: "Not authenticated",
+        description: "You must be logged in to save entries.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const { error } = await supabase.from("knowledge_entries").insert({ ...entry, user_id: user.id })
+
+    if (error) {
+      throw new Error(error.message)
+    }
   }
 
   const extractYouTubeContent = async () => {
@@ -104,8 +119,7 @@ export function ContentSubmissionForm() {
     setIsSubmitting(true)
 
     try {
-      const entry: KnowledgeEntry = {
-        id: Date.now().toString(),
+      await saveToSupabase({
         type: "youtube",
         title: youtubeTitle || "YouTube Video",
         content:
@@ -113,10 +127,7 @@ export function ContentSubmissionForm() {
           `YouTube video: ${youtubeUrl}\n\n[Content extraction was not successful, but the link has been saved]`,
         url: youtubeUrl,
         tags: ["youtube", "video"],
-        createdAt: new Date(),
-      }
-
-      saveToLocalStorage(entry)
+      })
 
       toast({
         title: "YouTube content saved!",
@@ -145,8 +156,7 @@ export function ContentSubmissionForm() {
     setIsSubmitting(true)
 
     try {
-      const entry: KnowledgeEntry = {
-        id: Date.now().toString(),
+      await saveToSupabase({
         type: "text",
         title: textTitle,
         content: textContent,
@@ -154,10 +164,7 @@ export function ContentSubmissionForm() {
           .split(",")
           .map((tag) => tag.trim())
           .filter(Boolean),
-        createdAt: new Date(),
-      }
-
-      saveToLocalStorage(entry)
+      })
 
       toast({
         title: "Text content added!",
@@ -222,17 +229,13 @@ export function ContentSubmissionForm() {
     setIsSubmitting(true)
 
     try {
-      const entry: KnowledgeEntry = {
-        id: Date.now().toString(),
+      await saveToSupabase({
         type: "twitter",
         title: twitterTitle || "Twitter Post",
         content: extractedTwitterContent || `Twitter/X post: ${twitterUrl}\n\n[Content not extracted]`,
         url: twitterUrl,
         tags: ["twitter", "social"],
-        createdAt: new Date(),
-      }
-
-      saveToLocalStorage(entry)
+      })
 
       toast({
         title: "Twitter post added!",

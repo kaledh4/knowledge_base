@@ -1,15 +1,37 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { supabase } from "@/lib/supabaseClient"
+import type { Session } from "@supabase/supabase-js"
+import { Auth } from "@/components/auth"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { FileText, Database, Sparkles, Bot } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { FileText, Database, Sparkles, Bot, LogOut } from "lucide-react"
 import { ContentSubmissionForm } from "@/components/content-submission-form"
 import { KnowledgeBaseList } from "@/components/knowledge-base-list"
 import { LLMChat } from "@/components/llm-chat"
 
 export default function HomePage() {
+  const [session, setSession] = useState<Session | null>(null)
   const [activeTab, setActiveTab] = useState("add")
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  if (!session) {
+    return <Auth />
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -26,11 +48,12 @@ export default function HomePage() {
                 <p className="text-sm text-muted-foreground">Curate and organize your learning resources</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="gap-1">
-                <Sparkles className="h-3 w-3" />
-                AI Ready
-              </Badge>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground hidden sm:inline">{session.user.email}</span>
+              <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </div>
           </div>
         </div>
@@ -63,7 +86,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <ContentSubmissionForm />
+            <ContentSubmissionForm key={session.user.id} />
           </TabsContent>
 
           <TabsContent value="browse" className="space-y-6">
@@ -74,7 +97,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <KnowledgeBaseList />
+            <KnowledgeBaseList key={session.user.id} />
           </TabsContent>
 
           <TabsContent value="chat" className="space-y-6">
@@ -86,7 +109,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <LLMChat />
+            <LLMChat key={session.user.id} />
           </TabsContent>
         </Tabs>
       </main>
