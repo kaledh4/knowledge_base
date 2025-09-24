@@ -67,8 +67,6 @@ export function KnowledgeBaseList() {
   const [editTags, setEditTags] = useState("")
   const { toast } = useToast()
 
-  const { toast } = useToast()
-
   useEffect(() => {
     const fetchEntries = async () => {
       const {
