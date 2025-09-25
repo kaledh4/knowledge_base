@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { YoutubeTranscript } from "youtube-transcript"
 import { Innertube } from "youtubei.js"
 
 interface YouTubeTranscriptResponse {
@@ -9,58 +10,32 @@ interface YouTubeTranscriptResponse {
   publishedAt: string
 }
 
-// A more robust extraction function with a custom User-Agent to mimic a real browser
 async function extractYouTubeInfo(url: string) {
-  const youtube = await Innertube.create({
-    // Using a common browser user agent can help avoid getting blocked
-    fetch: (input: RequestInfo | URL, init?: RequestInit) => {
-      const headers = new Headers(init?.headers)
-      headers.set(
-        "User-Agent",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-      )
-      const newInit = { ...init, headers }
-      return fetch(input, newInit)
-    },
-  })
-
   try {
-    const video = await youtube.getInfo(url)
+    const youtube = await Innertube.create()
+    const videoInfo = await youtube.getBasicInfo(url)
 
     let transcriptText = "[No transcript available for this video.]"
-    let transcriptError = null
-
     try {
-      if (video.captions) {
-        const transcript = await video.getTranscript()
-        if (transcript.transcript.length > 0) {
-          transcriptText = transcript.transcript.map((line) => line.text).join(" ")
-        }
+      const transcript = await YoutubeTranscript.fetchTranscript(url)
+      if (transcript && transcript.length > 0) {
+        transcriptText = transcript.map((item) => item.text).join(" ")
       }
-    } catch (error: any) {
-      transcriptError = error.message
-      console.error("Could not fetch transcript, falling back.", transcriptError)
-      if (transcriptError.includes("disabled")) {
-        transcriptText = "[Transcript is disabled by the video creator.]"
-      } else {
-        transcriptText = "[Transcript is unavailable for this video.]"
-      }
+    } catch (error) {
+      console.error("Error fetching transcript:", error)
+      transcriptText = "[Transcript is not available for this video.]"
     }
 
     return {
-      title: video.basic_info.title,
-      channelName: video.basic_info.channel?.name,
-      duration: video.basic_info.duration_string,
-      publishedAt: video.basic_info.publish_date,
+      title: videoInfo.basic_info.title,
+      channelName: videoInfo.basic_info.channel?.name,
+      duration: videoInfo.basic_info.duration_string,
+      publishedAt: videoInfo.basic_info.publish_date,
       transcript: transcriptText,
     }
   } catch (error: any) {
     console.error("YouTube extraction error:", error)
-    let errorMessage = "Failed to extract YouTube content."
-    if (error.message.includes("unavailable")) {
-      errorMessage = "This video is unavailable and cannot be processed due to YouTube's restrictions."
-    }
-    throw new Error(errorMessage)
+    throw new Error("Failed to extract YouTube content.")
   }
 }
 
