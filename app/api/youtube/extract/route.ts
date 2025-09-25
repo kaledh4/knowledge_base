@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { YoutubeTranscript } from "youtube-transcript"
+import { YoutubeTranscript, YoutubeTranscriptDisabledError } from "youtube-transcript"
 import { Innertube } from "youtubei.js"
 
 interface YouTubeTranscriptResponse {
@@ -11,32 +11,38 @@ interface YouTubeTranscriptResponse {
 }
 
 async function extractYouTubeInfo(url: string, lang?: string) {
+  let title = "Unknown Title"
+  let channelName = "Unknown Channel"
+  let duration = "Unknown"
+  let publishedAt = "Unknown Date"
+  let transcriptText = "[No transcript available for this video.]"
+
   try {
     const youtube = await Innertube.create()
     const videoInfo = await youtube.getBasicInfo(url)
+    title = videoInfo.basic_info.title || title
+    channelName = videoInfo.basic_info.channel?.name || channelName
+    duration = videoInfo.basic_info.duration_string || duration
+    publishedAt = videoInfo.basic_info.publish_date || publishedAt
+  } catch (error) {
+    console.error("Could not get video metadata, continuing to transcript extraction.", error)
+  }
 
-    let transcriptText = "[No transcript available for this video.]"
-    try {
-      const transcript = await YoutubeTranscript.fetchTranscript(url, { lang })
-      if (transcript && transcript.length > 0) {
-        transcriptText = transcript.map((item) => item.text).join(" ")
-      }
-    } catch (error) {
-      console.error("Error fetching transcript:", error)
+  try {
+    const transcript = await YoutubeTranscript.fetchTranscript(url, { lang })
+    if (transcript && transcript.length > 0) {
+      transcriptText = transcript.map((item) => item.text).join(" ")
+    }
+  } catch (error) {
+    console.error("Error fetching transcript:", error)
+    if (error instanceof YoutubeTranscriptDisabledError) {
+      transcriptText = "[Transcript is disabled by the video creator.]"
+    } else {
       transcriptText = "[Transcript is not available for this video.]"
     }
-
-    return {
-      title: videoInfo.basic_info.title,
-      channelName: videoInfo.basic_info.channel?.name,
-      duration: videoInfo.basic_info.duration_string,
-      publishedAt: videoInfo.basic_info.publish_date,
-      transcript: transcriptText,
-    }
-  } catch (error: any) {
-    console.error("YouTube extraction error:", error)
-    throw new Error("Failed to extract YouTube content.")
   }
+
+  return { title, channelName, duration, publishedAt, transcript: transcriptText }
 }
 
 export async function POST(request: NextRequest) {
@@ -50,11 +56,11 @@ export async function POST(request: NextRequest) {
     const videoInfo = await extractYouTubeInfo(url, lang)
 
     const response: YouTubeTranscriptResponse = {
-      title: videoInfo.title || "Unknown Title",
+      title: videoInfo.title,
       transcript: videoInfo.transcript,
-      duration: videoInfo.duration || "Unknown",
-      channelName: videoInfo.channelName || "Unknown Channel",
-      publishedAt: videoInfo.publishedAt || "Unknown Date",
+      duration: videoInfo.duration,
+      channelName: videoInfo.channelName,
+      publishedAt: videoInfo.publishedAt,
     }
 
     return NextResponse.json(response)
