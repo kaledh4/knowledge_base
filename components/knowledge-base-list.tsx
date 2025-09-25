@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect, useMemo } from "react"
+import { supabase } from "@/lib/supabaseClient"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -33,17 +34,18 @@ import {
   Edit,
   Copy,
   Tag,
+  Loader2,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface KnowledgeEntry {
-  id: string
+  id: number
   type: "youtube" | "text" | "twitter"
   title: string
   content: string
   url?: string
   tags: string[]
-  createdAt: Date
+  created_at: string
   metadata?: {
     channelName?: string
     duration?: string
@@ -56,7 +58,7 @@ type FilterOption = "all" | "youtube" | "text" | "twitter"
 
 export function KnowledgeBaseList() {
   const [entries, setEntries] = useState<KnowledgeEntry[]>([])
-  const [filteredEntries, setFilteredEntries] = useState<KnowledgeEntry[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState<SortOption>("newest")
   const [filterBy, setFilterBy] = useState<FilterOption>("all")
@@ -69,6 +71,7 @@ export function KnowledgeBaseList() {
 
   useEffect(() => {
     const fetchEntries = async () => {
+      setLoading(true)
       const {
         data: { user },
       } = await supabase.auth.getUser()
@@ -78,6 +81,7 @@ export function KnowledgeBaseList() {
           .from("knowledge_entries")
           .select("*")
           .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
 
         if (error) {
           console.error("Error fetching entries:", error)
@@ -86,45 +90,54 @@ export function KnowledgeBaseList() {
             description: "Could not fetch your knowledge base.",
             variant: "destructive",
           })
-        } else if (data) {
-          const parsed = data.map((entry: any) => ({
-            ...entry,
-            createdAt: new Date(entry.created_at),
-          }))
-          setEntries(parsed)
+        } else {
+          setEntries(data || [])
         }
       }
+      setLoading(false)
     }
 
     fetchEntries()
+
+    const subscription = supabase
+      .channel("knowledge_entries")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "knowledge_entries" },
+        (payload) => {
+          console.log("Change received!", payload)
+          fetchEntries() // Refetch on any change
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(subscription)
+    }
   }, [toast])
 
-  useEffect(() => {
-    // Filter and sort entries
+  const filteredEntries = useMemo(() => {
     let filtered = entries
 
-    // Apply search filter
     if (searchQuery) {
       filtered = filtered.filter(
         (entry) =>
           entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          entry.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          entry.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
+          entry.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          entry.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
       )
     }
 
-    // Apply type filter
     if (filterBy !== "all") {
       filtered = filtered.filter((entry) => entry.type === filterBy)
     }
 
-    // Apply sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "newest":
-          return b.createdAt.getTime() - a.createdAt.getTime()
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         case "oldest":
-          return a.createdAt.getTime() - b.createdAt.getTime()
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         case "title":
           return a.title.localeCompare(b.title)
         case "type":
@@ -134,77 +147,56 @@ export function KnowledgeBaseList() {
       }
     })
 
-    setFilteredEntries(filtered)
+    return filtered
   }, [searchQuery, filterBy, sortBy, entries])
 
-  const deleteEntry = async (id: string) => {
+  const deleteEntry = async (id: number) => {
     const { error } = await supabase.from("knowledge_entries").delete().match({ id })
-
     if (error) {
-      toast({
-        title: "Error deleting entry",
-        description: error.message,
-        variant: "destructive",
-      })
+      toast({ title: "Error deleting entry", description: error.message, variant: "destructive" })
     } else {
-      const updated = entries.filter((entry) => entry.id !== id)
-      setEntries(updated)
-      toast({
-        title: "Entry deleted",
-        description: "The entry has been removed from your knowledge base.",
-      })
+      toast({ title: "Entry deleted" })
+      // The realtime subscription will handle the UI update
     }
   }
 
-  const updateEntry = async (updatedEntry: KnowledgeEntry) => {
+  const saveEdit = async () => {
+    if (!editingEntry) return
+
     const { error } = await supabase
       .from("knowledge_entries")
       .update({
-        title: updatedEntry.title,
-        content: updatedEntry.content,
-        tags: updatedEntry.tags,
+        title: editTitle,
+        content: editContent,
+        tags: editTags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
       })
-      .match({ id: updatedEntry.id })
+      .match({ id: editingEntry.id })
 
     if (error) {
-      toast({
-        title: "Error updating entry",
-        description: error.message,
-        variant: "destructive",
-      })
+      toast({ title: "Error updating entry", description: error.message, variant: "destructive" })
     } else {
-      const updated = entries.map((entry) => (entry.id === updatedEntry.id ? updatedEntry : entry))
-      setEntries(updated)
-      toast({
-        title: "Entry updated",
-        description: "Your changes have been saved.",
-      })
+      toast({ title: "Entry updated" })
+      setEditingEntry(null)
     }
   }
 
   const exportData = () => {
     const dataStr = JSON.stringify(entries, null, 2)
     const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr)
-
     const exportFileDefaultName = `knowledge-base-${new Date().toISOString().split("T")[0]}.json`
-
     const linkElement = document.createElement("a")
     linkElement.setAttribute("href", dataUri)
     linkElement.setAttribute("download", exportFileDefaultName)
     linkElement.click()
-
-    toast({
-      title: "Export complete",
-      description: "Your knowledge base has been exported as JSON.",
-    })
+    toast({ title: "Export complete" })
   }
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    toast({
-      title: "Copied to clipboard",
-      description: "Content has been copied to your clipboard.",
-    })
+    toast({ title: "Copied to clipboard" })
   }
 
   const startEdit = (entry: KnowledgeEntry) => {
@@ -212,26 +204,6 @@ export function KnowledgeBaseList() {
     setEditTitle(entry.title)
     setEditContent(entry.content)
     setEditTags(entry.tags.join(", "))
-  }
-
-  const saveEdit = () => {
-    if (!editingEntry) return
-
-    const updatedEntry: KnowledgeEntry = {
-      ...editingEntry,
-      title: editTitle,
-      content: editContent,
-      tags: editTags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean),
-    }
-
-    updateEntry(updatedEntry)
-    setEditingEntry(null)
-    setEditTitle("")
-    setEditContent("")
-    setEditTags("")
   }
 
   const getTypeIcon = (type: string) => {
@@ -260,9 +232,12 @@ export function KnowledgeBaseList() {
     }
   }
 
-  const getUniqueTagsCount = () => {
-    const allTags = entries.flatMap((entry) => entry.tags)
-    return new Set(allTags).size
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
   }
 
   if (entries.length === 0) {
@@ -285,7 +260,6 @@ export function KnowledgeBaseList() {
     <div className="space-y-6">
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-4">
-        {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -295,8 +269,6 @@ export function KnowledgeBaseList() {
             className="pl-10"
           />
         </div>
-
-        {/* Filters and Sort */}
         <div className="flex gap-2">
           <Select value={filterBy} onValueChange={(value: FilterOption) => setFilterBy(value)}>
             <SelectTrigger className="w-32">
@@ -310,7 +282,6 @@ export function KnowledgeBaseList() {
               <SelectItem value="twitter">Twitter</SelectItem>
             </SelectContent>
           </Select>
-
           <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
             <SelectTrigger className="w-32">
               {sortBy === "newest" || sortBy === "oldest" ? (
@@ -331,7 +302,6 @@ export function KnowledgeBaseList() {
               <SelectItem value="type">Type</SelectItem>
             </SelectContent>
           </Select>
-
           <Button variant="outline" onClick={exportData}>
             <Download className="h-4 w-4 mr-2" />
             Export
@@ -344,8 +314,6 @@ export function KnowledgeBaseList() {
         <span>{entries.length} total entries</span>
         <Separator orientation="vertical" className="h-4" />
         <span>{filteredEntries.length} showing</span>
-        <Separator orientation="vertical" className="h-4" />
-        <span>{getUniqueTagsCount()} unique tags</span>
       </div>
 
       {/* Entries */}
@@ -368,7 +336,7 @@ export function KnowledgeBaseList() {
                       </Badge>
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {entry.createdAt.toLocaleDateString()}
+                        {new Date(entry.created_at).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -387,7 +355,7 @@ export function KnowledgeBaseList() {
                           {entry.title}
                         </DialogTitle>
                         <DialogDescription>
-                          {entry.type} • {entry.createdAt.toLocaleDateString()}
+                          {entry.type} • {new Date(entry.created_at).toLocaleDateString()}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
