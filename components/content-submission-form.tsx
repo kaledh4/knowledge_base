@@ -78,7 +78,7 @@ export function ContentSubmissionForm() {
     setExtractionMessage("Extracting video content...")
 
     try {
-      const response = await fetch("/api/youtube/extract", {
+      const response = await fetch("/api/youtube/transcript", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

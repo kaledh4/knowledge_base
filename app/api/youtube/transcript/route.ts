@@ -17,30 +17,31 @@ async function extractYouTubeInfo(url: string, lang?: string) {
   let publishedAt = "Unknown Date"
   let transcriptText = "[No transcript available for this video.]"
 
-  try {
-    const youtube = await Innertube.create()
-    const videoInfo = await youtube.getBasicInfo(url)
-    title = videoInfo.basic_info.title || title
-    channelName = videoInfo.basic_info.channel?.name || channelName
-    duration = videoInfo.basic_info.duration_string || duration
-    publishedAt = videoInfo.basic_info.publish_date || publishedAt
-  } catch (error) {
-    console.error("Could not get video metadata, continuing to transcript extraction.", error)
-  }
+  const youtube = await Innertube.create()
 
-  try {
-    const transcript = await YoutubeTranscript.fetchTranscript(url, { lang })
-    if (transcript && transcript.length > 0) {
-      transcriptText = transcript.map((item) => item.text).join(" ")
-    }
-  } catch (error) {
-    console.error("Error fetching transcript:", error)
-    if (error instanceof YoutubeTranscriptDisabledError) {
-      transcriptText = "[Transcript is disabled by the video creator.]"
-    } else {
-      transcriptText = "[Transcript is not available for this video.]"
-    }
-  }
+  const videoInfoPromise = youtube.getBasicInfo(url).then(info => {
+      title = info.basic_info.title || title
+      channelName = info.basic_info.channel?.name || channelName
+      duration = info.basic_info.duration_string || duration
+      publishedAt = info.basic_info.publish_date || publishedAt
+  }).catch(error => {
+      console.error("Could not get video metadata, continuing to transcript extraction.", error)
+  })
+
+  const transcriptPromise = YoutubeTranscript.fetchTranscript(url, { lang }).then(transcript => {
+      if (transcript && transcript.length > 0) {
+          transcriptText = transcript.map((item) => item.text).join(" ")
+      }
+  }).catch(error => {
+      console.error("Error fetching transcript:", error)
+      if (error instanceof YoutubeTranscriptDisabledError) {
+          transcriptText = "[Transcript is disabled by the video creator.]"
+      } else {
+          transcriptText = "[Transcript is not available for this video.]"
+      }
+  })
+
+  await Promise.all([videoInfoPromise, transcriptPromise])
 
   return { title, channelName, duration, publishedAt, transcript: transcriptText }
 }
