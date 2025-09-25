@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { FileText, Database, Sparkles, Bot, LogOut } from "lucide-react"
 import { ContentSubmissionForm } from "@/components/content-submission-form"
 import { KnowledgeBaseList } from "@/components/knowledge-base-list"
-import { LLMChat } from "@/components/llm-chat"
+import { AIChat } from "@/components/ai-chat"
 
 export default function HomePage() {
   const [session, setSession] = useState<Session | null>(null)
@@ -109,7 +109,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <LLMChat key={session.user.id} />
+            <AIChat key={session.user.id} />
           </TabsContent>
         </Tabs>
       </main>

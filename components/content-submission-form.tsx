@@ -64,10 +64,37 @@ export function ContentSubmissionForm() {
       return
     }
 
-    const { error } = await supabase.from("knowledge_entries").insert({ ...entry, user_id: user.id })
+    const { data, error } = await supabase.from("knowledge_entries").insert({ ...entry, user_id: user.id }).select()
 
     if (error) {
       throw new Error(error.message)
+    }
+
+    // Also save to ChromaDB for vector search
+    if (data && data[0]) {
+      try {
+        await fetch('/api/chroma/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: data[0].id,
+            content: entry.content,
+            metadata: {
+              title: entry.title,
+              type: entry.type,
+              url: entry.url,
+              tags: entry.tags,
+              user_id: user.id,
+              ...entry.metadata
+            }
+          })
+        })
+      } catch (chromaError) {
+        console.error('Failed to save to ChromaDB:', chromaError)
+        // Don't fail the entire operation if ChromaDB fails
+      }
     }
   }
 

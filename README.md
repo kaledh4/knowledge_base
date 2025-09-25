@@ -1,91 +1,163 @@
-# Knowledge Base - Simple Vercel Version
+# Knowledge Base Builder
 
-A simple knowledge management system built with Next.js that runs entirely in the browser using localStorage for data persistence.
+A modern, AI-powered knowledge management system that helps you collect, organize, and query content from various sources including YouTube videos, Twitter/X posts, and text content.
 
-## Features
+## ✨ Features
 
-- 🌐 **Web Content Management**: Add and organize web content and notes
-- 🔍 **Full-Text Search**: Search through your saved content
-- 📱 **Modern UI**: Responsive interface built with Next.js and Tailwind CSS
-- 💾 **Local Storage**: All data stored locally in your browser
-- ⚡ **Fast Deployment**: Deploy to Vercel with zero configuration
+- **Email/Password Authentication** - Secure login system using Supabase Auth
+- **Multi-Source Content Extraction**:
+  - YouTube video transcripts and metadata
+  - Twitter/X post content extraction
+  - Manual text content submission
+- **Vector Search with ChromaDB** - Advanced semantic search capabilities
+- **AI Chat Interface** - Query your knowledge base using natural language
+- **Modern UI** - Built with Next.js, Tailwind CSS, and Radix UI components
+- **Real-time Updates** - Live synchronization of content
 
-## Quick Start
+## 🚀 Quick Start
 
-### 1. Clone and Setup
-```bash
-git clone https://github.com/kaledh4/knowledge_base.git
-cd knowledge_base
-npm install
-```
+### Prerequisites
 
-### 2. Start Development Server
-```bash
-npm run dev
-```
-Open http://localhost:3000 to view the application.
+- Node.js 18+ 
+- npm or pnpm
+- Supabase account
+- ChromaDB instance (optional - for vector search)
 
-### 3. Deploy to Vercel
+### Installation
 
-#### Option 1: Via Vercel Dashboard
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-2. Click "New Project"
-3. Import your GitHub repository
-4. Deploy with default settings (no environment variables needed)
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd knowledge_base
+   ```
 
-#### Option 2: Via Git Push
-```bash
-git add .
-git commit -m "Deploy to Vercel"
-git push origin master
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-## Project Structure
-```
-knowledge_base/
-├── app/                    # Next.js app directory
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
-│   └── page.tsx          # Home page
-├── components/            # React components
-│   ├── ui/               # Reusable UI components
-│   └── *.tsx            # Main application components
-├── lib/                  # Utility libraries
-│   └── utils.ts         # Helper functions
-├── package.json          # Dependencies and scripts
-└── README.md           # This file
-```
+3. **Set up environment variables**
+   
+   Copy `.env.local` and update with your credentials:
+   ```bash
+   # Supabase Configuration
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url_here
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+   
+   # ChromaDB Configuration (optional)
+   CHROMA_URL=http://localhost:8000
+   ```
 
-## How It Works
+4. **Set up Supabase Database**
+   
+   Create a table called `knowledge_entries` with the following structure:
+   ```sql
+   CREATE TABLE knowledge_entries (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+     type TEXT NOT NULL CHECK (type IN ('youtube', 'text', 'twitter')),
+     title TEXT NOT NULL,
+     content TEXT NOT NULL,
+     url TEXT,
+     tags TEXT[] DEFAULT '{}',
+     metadata JSONB DEFAULT '{}',
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+   );
+   
+   -- Enable Row Level Security
+   ALTER TABLE knowledge_entries ENABLE ROW LEVEL SECURITY;
+   
+   -- Create policy for users to only see their own entries
+   CREATE POLICY "Users can only see their own entries" ON knowledge_entries
+     FOR ALL USING (auth.uid() = user_id);
+   ```
 
-This is a client-side application that:
-- Stores all data in browser localStorage
-- Provides a simple interface for managing knowledge items
-- Includes search functionality across stored content
-- Works entirely offline after initial load
+5. **Start ChromaDB (Optional)**
+   
+   For vector search functionality, run ChromaDB:
+   ```bash
+   # Using Docker
+   docker run -p 8000:8000 chromadb/chroma
+   
+   # Or install locally
+   pip install chromadb
+   chroma run --host localhost --port 8000
+   ```
 
-## Development
+6. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
-```bash
-# Install dependencies
-npm install
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-# Start development server
-npm run dev
+## 🛠️ Usage
 
-# Build for production
-npm run build
+### Adding Content
 
-# Start production server
-npm start
-```
+1. **YouTube Videos**: Paste a YouTube URL to automatically extract transcript and metadata
+2. **Twitter/X Posts**: Paste a tweet URL to extract content
+3. **Text Content**: Manually add articles, notes, or any text content
 
-## Deployment
+### AI Chat
 
-This application is optimized for Vercel deployment:
-- No environment variables required
-- No backend services needed
-- Automatic builds on git push
-- Global CDN distribution
+Use the AI Chat tab to query your knowledge base:
+- Ask questions about your saved content
+- Get contextual answers based on semantic similarity
+- View source references for each response
 
-**Built with ❤️ using Next.js and localStorage**
+### Managing Content
+
+- Browse all your saved content in the "Browse Knowledge Base" tab
+- Search and filter by content type, tags, or keywords
+- Export content for use with other tools
+
+## 🏗️ Architecture
+
+- **Frontend**: Next.js 14 with TypeScript
+- **UI Components**: Radix UI + Tailwind CSS
+- **Authentication**: Supabase Auth
+- **Database**: Supabase PostgreSQL
+- **Vector Search**: ChromaDB
+- **Content Extraction**: 
+  - YouTube: `youtube-transcript` + `youtubei.js`
+  - Twitter: `@catdevnull/twitter-scraper`
+
+## 📦 Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy!
+
+### Other Platforms
+
+The app can be deployed to any platform that supports Next.js:
+- Netlify
+- Railway
+- DigitalOcean App Platform
+- AWS Amplify
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+## 🆘 Support
+
+If you encounter any issues:
+
+1. Check that all environment variables are set correctly
+2. Ensure Supabase database is set up with the correct schema
+3. Verify ChromaDB is running (if using vector search)
+4. Check the browser console for any error messages
+
+For additional help, please open an issue on GitHub.
