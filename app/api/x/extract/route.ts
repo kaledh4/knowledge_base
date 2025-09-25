@@ -1,15 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-// A simple function to extract tweet content by fetching the HTML of a service like fxtwitter.com
+// A simple function to extract tweet content by fetching the HTML of a service like twitframe.com
 // and parsing the OpenGraph meta tags. This avoids the need for a full browser or official API access.
 async function extractTweetContent(url: string): Promise<string | null> {
   try {
-    // Replace twitter.com or x.com with fxtwitter.com
-    const fxtwitterUrl = url.replace(/(twitter\.com|x\.com)/, "fxtwitter.com")
-    const response = await fetch(fxtwitterUrl)
+    // Replace twitter.com or x.com with twitframe.com
+    const twitframeUrl = url.replace(/(twitter\.com|x\.com)/, "twitframe.com")
+    const response = await fetch(twitframeUrl)
 
     if (!response.ok) {
-      throw new Error("Failed to fetch tweet content from fxtwitter")
+      throw new Error("Failed to fetch tweet content from twitframe")
     }
 
     const html = await response.text()
