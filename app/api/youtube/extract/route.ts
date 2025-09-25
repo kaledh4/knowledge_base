@@ -10,14 +10,14 @@ interface YouTubeTranscriptResponse {
   publishedAt: string
 }
 
-async function extractYouTubeInfo(url: string) {
+async function extractYouTubeInfo(url: string, lang?: string) {
   try {
     const youtube = await Innertube.create()
     const videoInfo = await youtube.getBasicInfo(url)
 
     let transcriptText = "[No transcript available for this video.]"
     try {
-      const transcript = await YoutubeTranscript.fetchTranscript(url)
+      const transcript = await YoutubeTranscript.fetchTranscript(url, { lang })
       if (transcript && transcript.length > 0) {
         transcriptText = transcript.map((item) => item.text).join(" ")
       }
@@ -41,13 +41,13 @@ async function extractYouTubeInfo(url: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { url } = await request.json()
+    const { url, lang } = await request.json()
 
     if (!url) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 })
     }
 
-    const videoInfo = await extractYouTubeInfo(url)
+    const videoInfo = await extractYouTubeInfo(url, lang)
 
     const response: YouTubeTranscriptResponse = {
       title: videoInfo.title || "Unknown Title",
